@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@vite-pwa/assets-generator": "^2.0.0",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}

@@ -148,7 +148,13 @@ function App() {
 
   return (
     <div className="app">
-      <h1>AI Calorie Tracker</h1>
+      <header className="header">
+        <img src="/logo.svg" alt="" className="logo" />
+        <div>
+          <h1>AI Calorie Tracker</h1>
+          <p className="subtitle">Snap your meal, know your macros</p>
+        </div>
+      </header>
 
       <div className="actions">
         <button className="camera-btn" onClick={openCamera} disabled={loading} aria-label="Open camera">
@@ -185,25 +191,46 @@ function App() {
       )}
 
       {preview && <img className="preview" src={preview} alt="Your meal" />}
-      {loading && <p>Analyzing your meal... this can take a few seconds.</p>}
+
+      {loading && (
+        <div className="loading">
+          <div className="spinner" />
+          <p>Analyzing your meal... this can take a few seconds.</p>
+        </div>
+      )}
+
       {error && <p className="error">{error}</p>}
+
+      {!loading && !preview && items.length === 0 && (
+        <p className="hint">Tap the camera to scan a meal, or add one manually.</p>
+      )}
 
       {items.length > 0 && (
         <div className="result">
           <div className="total">
-            <h2>{round1(total.calories)} kcal</h2>
-            <p>
-              Carbs {round1(total.carbs_g)} g · Protein {round1(total.protein_g)} g · Fat {round1(total.fat_g)} g
-            </p>
+            <p className="total-label">Total</p>
+            <h2>{round1(total.calories)} <span>kcal</span></h2>
+            <div className="macros">
+              <div className="macro"><strong>{round1(total.carbs_g)} g</strong><span>Carbs</span></div>
+              <div className="macro"><strong>{round1(total.protein_g)} g</strong><span>Protein</span></div>
+              <div className="macro"><strong>{round1(total.fat_g)} g</strong><span>Fat</span></div>
+            </div>
           </div>
+
           {items.map((item, i) => (
             <div className="item" key={i}>
               <div className="item-info">
                 <strong>{item.name}</strong>
-                <span>{item.portion}</span>
-                <span>
-                  {item.calories} kcal · C {item.carbs_g} · P {item.protein_g} · F {item.fat_g}
-                </span>
+                <span className="portion">{item.portion}</span>
+                <div className="chips">
+                  <span className="chip carbs">C {item.carbs_g} g</span>
+                  <span className="chip protein">P {item.protein_g} g</span>
+                  <span className="chip fat">F {item.fat_g} g</span>
+                </div>
+              </div>
+              <div className="item-cal">
+                <strong>{item.calories}</strong>
+                <span>kcal</span>
               </div>
               <button className="remove" onClick={() => removeItem(i)} aria-label={`Remove ${item.name}`}>✕</button>
             </div>
