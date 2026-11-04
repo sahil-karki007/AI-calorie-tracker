@@ -6,6 +6,7 @@ from google.genai import errors
 from google.genai import types
 load_dotenv()
 
+import httpx
 client = genai.Client(http_options=types.HttpOptions(timeout=60000))
 MODELS = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"]
 
@@ -25,16 +26,21 @@ def generate_with_retry(image_bytes, mime_type, retries=2):
                 )
             except errors.APIError as e:
                 last_error = e
-                if e.code in (429, 503, 504):
+                if e.code in (503, 504):
                     print(f"{model} busy (error {e.code}), attempt {attempt + 1} of {retries}")
                     if attempt < retries - 1:
                         time.sleep(2)
                     continue
-                if e.code == 404:
-                    print(f"{model} not available, trying next model")
+                if e.code in (404, 429):
+                    print(f"{model} unavailable (error {e.code}), trying next model")
                     break
                 raise
+            except httpx.TimeoutException as e:
+                last_error = e
+                print(f"{model} timed out, trying next model")
+                break
     raise last_error
+
 def add_totals(data):
     keys = ["calories", "carbs_g", "protein_g", "fat_g"]
     data["total"] = {k: round(sum(item[k] for item in data["items"]), 1) for k in keys}
